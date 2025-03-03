@@ -1,0 +1,42 @@
+version: "3.8"
+
+services:
+  mqtt-server:
+    image: eclipse-mosquitto:latest
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./config/mosquitto:/mosquitto/config
+    command: mosquitto -c /mosquitto/config/mosquitto.conf
+    networks:
+      - ip6net
+
+  cs:
+    build:
+      context: ./charging-station
+    depends_on:
+      - mqtt-server
+    environment:
+      - MQTT_SERVER_ADDRESS=mqtt-server
+    networks:
+      - ip6net
+
+  nodered:
+    image: ghcr.io/everest/everest-dev-environment/nodered:docker-images-v0.1.0
+    depends_on:
+      - mqtt-server
+    volumes:
+      - ./config/nodered:/data
+    networks:
+      - ip6net
+    ports:
+      - "1880:1880"
+    environment:
+      - MQTT_SERVER_ADDRESS=mqtt-server
+
+networks:
+  ip6net:
+    enable_ipv6: true
+    ipam:
+      driver: default
