@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   mqtt-server:
     image: eclipse-mosquitto:latest
@@ -19,6 +17,10 @@ services:
       - mqtt-server
     environment:
       - MQTT_SERVER_ADDRESS=mqtt-server
+      - SCRIPT_TO_RUN=run-sil.sh
+      - FLOW_FILE=config-sil-flow.json
+    volumes:
+      - nodered_data:/everest/everest-workspace/everest-core/config/nodered
     networks:
       - ip6net
 
@@ -26,8 +28,9 @@ services:
     image: ghcr.io/everest/everest-dev-environment/nodered:docker-images-v0.1.0
     depends_on:
       - mqtt-server
+      - cs
     volumes:
-      - ./config/nodered:/data
+      - nodered_data:/data
     networks:
       - ip6net
     ports:
@@ -40,3 +43,6 @@ networks:
     enable_ipv6: true
     ipam:
       driver: default
+
+volumes:
+  nodered_data:

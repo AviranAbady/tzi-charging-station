@@ -10,14 +10,6 @@ RUN apt install -y python3-pip python3-venv git rsync wget cmake doxygen \
 
 RUN ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
 RUN  apt -y --no-install-recommends install tzdata
-
-RUN apt install -y software-properties-common
-RUN apt-add-repository ppa:mosquitto-dev/mosquitto-ppa
-RUN apt update
-RUN apt install -y mosquitto
-COPY mosquitto.conf /everest/mosquitto.conf
-COPY entrypoint.sh /everest/entrypoint.sh
-
 RUN python3 -m venv ./venv3
 ENV PATH="/everest/venv3/bin/:$PATH"
 RUN pip install --upgrade pip setuptools wheel jstyleson jsonschema
@@ -35,20 +27,7 @@ RUN mkdir -p /everest/everest-workspace/everest-core/build
 RUN cd /everest/everest-workspace/everest-core/build && cmake ..
 RUN cd /everest/everest-workspace/everest-core/build && make -j$(nproc) install
 
-#FROM bookworm-slim as runner
-#
-#WORKDIR /everest
-#
-#RUN ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
-#RUN apt -y --no-install-recommends install tzdata
-#
-#RUN apt install -y software-properties-common
-#RUN apt-add-repository ppa:mosquitto-dev/mosquitto-ppa
-#RUN apt update
-#RUN apt install -y mosquitto
-#COPY mosquitto.conf /everest/mosquitto.conf
-#COPY entrypoint.sh /everest/entrypoint.sh
-#
-
+COPY entrypoint.sh /everest/entrypoint.sh
 RUN chmod +x /everest/entrypoint.sh
+
 ENTRYPOINT ["/everest/entrypoint.sh"]
